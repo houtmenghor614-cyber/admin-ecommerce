@@ -24,7 +24,7 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
             >
               <i className="fas fa-bars text-xl"></i>
             </button>
-            <h1 className="text-xl font-bold">DYNA STORE Admin</h1>
+            <h1 className="text-xl font-bold">Menghor store Admin</h1>
           </div>
           
           <div className="flex items-center space-x-4">
