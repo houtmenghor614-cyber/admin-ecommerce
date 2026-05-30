@@ -32,8 +32,8 @@ function App() {
   const [mainPreview, setMainPreview] = useState(null);
   const [subPreviews, setSubPreviews] = useState([]);
 
-  const API = 'http://127.0.0.1:8000/api';
-  const BASE_URL = 'http://127.0.0.1:8000';
+const API = 'https://backend-ecommerce-6hef.onrender.com/api';
+  const BASE_URL = 'https://backend-ecommerce-6hef.onrender.com';
 
   const fetchData = async () => {
     setLoading(true);
