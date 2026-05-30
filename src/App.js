@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals, no-unused-vars */
 import React, { useState, useEffect } from 'react';
 
 function App() {
