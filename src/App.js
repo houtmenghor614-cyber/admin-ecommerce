@@ -6,6 +6,7 @@ function App() {
   const [admin, setAdmin] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -32,8 +33,19 @@ function App() {
   const [mainPreview, setMainPreview] = useState(null);
   const [subPreviews, setSubPreviews] = useState([]);
 
-const API = 'https://backend-ecommerce-6hef.onrender.com/api';
+  const API = 'https://backend-ecommerce-6hef.onrender.com/api';
   const BASE_URL = 'https://backend-ecommerce-6hef.onrender.com';
+
+  // Close mobile menu on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -398,8 +410,8 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
 
   if (!isLoggedIn) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-        <div style={{ background: 'white', padding: 40, borderRadius: 12, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px' }}>
+        <div style={{ background: 'white', padding: '40px 20px', borderRadius: 12, width: '90%', maxWidth: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
           <div style={{ textAlign: 'center', marginBottom: 30 }}>
             <i className="fas fa-store" style={{ fontSize: 48, color: '#3b82f6' }}></i>
             <h2 style={{ marginTop: 10, color: '#1e293b' }}>Admin Login</h2>
@@ -431,12 +443,44 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9', position: 'relative' }}>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        style={{
+          position: 'fixed',
+          top: 16,
+          left: 16,
+          zIndex: 1001,
+          background: '#0f172a',
+          color: 'white',
+          border: 'none',
+          borderRadius: 8,
+          padding: '12px',
+          cursor: 'pointer',
+          display: window.innerWidth < 1024 ? 'block' : 'none',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        }}
+      >
+        <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'}`} style={{ fontSize: 20 }}></i>
+      </button>
+
       {/* Sidebar */}
-      <div style={{ width: 280, background: '#0f172a', color: 'white', position: 'fixed', height: '100vh', overflowY: 'auto' }}>
+      <div style={{ 
+        width: 280, 
+        background: '#0f172a', 
+        color: 'white', 
+        position: 'fixed', 
+        height: '100vh', 
+        overflowY: 'auto',
+        transform: window.innerWidth < 1024 ? (mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+        transition: 'transform 0.3s ease-in-out',
+        zIndex: 1000,
+        boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
+      }}>
         <div style={{ padding: '24px 20px', textAlign: 'center', borderBottom: '1px solid #1e293b' }}>
           <i className="fas fa-crown" style={{ fontSize: 32, color: '#fbbf24' }}></i>
-          <h2 style={{ margin: '10px 0 5px', fontSize: 20 }}>DYNA STORE</h2>
+          <h2 style={{ margin: '10px 0 5px', fontSize: 20 }}>MENGHOR STORE</h2>
           <p style={{ fontSize: 12, color: '#94a3b8' }}>Administrator Panel</p>
         </div>
         <nav style={{ marginTop: 20 }}>
@@ -449,7 +493,10 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
           ].map(tab => (
             <div 
               key={tab.id} 
-              onClick={() => setActiveTab(tab.id)} 
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (window.innerWidth < 1024) setMobileMenuOpen(false);
+              }} 
               style={{ 
                 padding: '14px 24px', 
                 cursor: 'pointer', 
@@ -466,7 +513,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
             </div>
           ))}
         </nav>
-        <div style={{ position: 'absolute', bottom: 20, width: 280, padding: '0 20px' }}>
+        <div style={{ position: 'absolute', bottom: 20, width: '100%', padding: '0 20px', left: 0, right: 0 }}>
           <button onClick={handleLogout} style={{ width: '100%', padding: 12, background: '#dc2626', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <i className="fas fa-sign-out-alt"></i> Logout
           </button>
@@ -474,20 +521,33 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
       </div>
 
       {/* Main Content */}
-      <div style={{ marginLeft: 280, flex: 1 }}>
-        <header style={{ background: 'white', padding: '16px 32px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+      <div style={{ 
+        marginLeft: window.innerWidth < 1024 ? 0 : 280, 
+        flex: 1,
+        width: window.innerWidth < 1024 ? '100%' : 'auto'
+      }}>
+        <header style={{ 
+          background: 'white', 
+          padding: '16px 20px', 
+          borderBottom: '1px solid #e2e8f0', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          marginLeft: window.innerWidth < 1024 ? 0 : 0
+        }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 24, color: '#1e293b' }}>
+            <h1 style={{ margin: 0, fontSize: window.innerWidth < 768 ? 18 : 24, color: '#1e293b' }}>
               <i className={`fas ${activeTab === 'dashboard' ? 'fa-tachometer-alt' : activeTab === 'products' ? 'fa-box' : activeTab === 'categories' ? 'fa-tags' : activeTab === 'orders' ? 'fa-shopping-cart' : 'fa-users'}`} style={{ marginRight: 10, color: '#3b82f6' }}></i>
               {activeTab.toUpperCase()}
             </h1>
           </div>
           <div>
-            <i className="fas fa-user-circle" style={{ fontSize: 32, color: '#64748b' }}></i>
+            <i className="fas fa-user-circle" style={{ fontSize: window.innerWidth < 768 ? 24 : 32, color: '#64748b' }}></i>
           </div>
         </header>
 
-        <div style={{ padding: 32 }}>
+        <div style={{ padding: window.innerWidth < 768 ? 16 : 32 }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: 50 }}>
               <i className="fas fa-spinner fa-spin" style={{ fontSize: 48, color: '#3b82f6' }}></i>
@@ -498,47 +558,52 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
               {/* Dashboard */}
               {activeTab === 'dashboard' && (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 32 }}>
-                    <div style={{ background: 'white', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #3b82f6' }}>
-                      <i className="fas fa-box" style={{ fontSize: 32, color: '#3b82f6' }}></i>
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: window.innerWidth < 640 ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+                    gap: window.innerWidth < 640 ? 12 : 24, 
+                    marginBottom: 32 
+                  }}>
+                    <div style={{ background: 'white', padding: window.innerWidth < 640 ? 16 : 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #3b82f6' }}>
+                      <i className="fas fa-box" style={{ fontSize: window.innerWidth < 640 ? 24 : 32, color: '#3b82f6' }}></i>
                       <h3 style={{ margin: '10px 0 5px', color: '#64748b', fontSize: 14 }}>Products</h3>
-                      <p style={{ fontSize: 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{products.length}</p>
+                      <p style={{ fontSize: window.innerWidth < 640 ? 28 : 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{products.length}</p>
                     </div>
-                    <div style={{ background: 'white', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #10b981' }}>
-                      <i className="fas fa-tags" style={{ fontSize: 32, color: '#10b981' }}></i>
+                    <div style={{ background: 'white', padding: window.innerWidth < 640 ? 16 : 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #10b981' }}>
+                      <i className="fas fa-tags" style={{ fontSize: window.innerWidth < 640 ? 24 : 32, color: '#10b981' }}></i>
                       <h3 style={{ margin: '10px 0 5px', color: '#64748b', fontSize: 14 }}>Categories</h3>
-                      <p style={{ fontSize: 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{categories.length}</p>
+                      <p style={{ fontSize: window.innerWidth < 640 ? 28 : 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{categories.length}</p>
                     </div>
-                    <div style={{ background: 'white', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #8b5cf6' }}>
-                      <i className="fas fa-shopping-cart" style={{ fontSize: 32, color: '#8b5cf6' }}></i>
+                    <div style={{ background: 'white', padding: window.innerWidth < 640 ? 16 : 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #8b5cf6' }}>
+                      <i className="fas fa-shopping-cart" style={{ fontSize: window.innerWidth < 640 ? 24 : 32, color: '#8b5cf6' }}></i>
                       <h3 style={{ margin: '10px 0 5px', color: '#64748b', fontSize: 14 }}>Orders</h3>
-                      <p style={{ fontSize: 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{orders.length}</p>
+                      <p style={{ fontSize: window.innerWidth < 640 ? 28 : 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{orders.length}</p>
                     </div>
-                    <div style={{ background: 'white', padding: 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #f59e0b' }}>
-                      <i className="fas fa-users" style={{ fontSize: 32, color: '#f59e0b' }}></i>
+                    <div style={{ background: 'white', padding: window.innerWidth < 640 ? 16 : 24, borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderTop: '4px solid #f59e0b' }}>
+                      <i className="fas fa-users" style={{ fontSize: window.innerWidth < 640 ? 24 : 32, color: '#f59e0b' }}></i>
                       <h3 style={{ margin: '10px 0 5px', color: '#64748b', fontSize: 14 }}>Users</h3>
-                      <p style={{ fontSize: 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{users.length}</p>
+                      <p style={{ fontSize: window.innerWidth < 640 ? 28 : 36, fontWeight: 'bold', margin: 0, color: '#1e293b' }}>{users.length}</p>
                     </div>
                   </div>
                   
                   {/* Recent Orders */}
-                  <div style={{ background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <h3 style={{ margin: '0 0 20px 0' }}><i className="fas fa-clock"></i> Recent Orders</h3>
+                  <div style={{ background: 'white', borderRadius: 12, padding: window.innerWidth < 640 ? 16 : 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflowX: 'auto' }}>
+                    <h3 style={{ margin: '0 0 20px 0', fontSize: window.innerWidth < 640 ? 18 : 20 }}><i className="fas fa-clock"></i> Recent Orders</h3>
                     {orders.slice(0, 5).map(order => (
-                      <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <div key={order.id} style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', justifyContent: 'space-between', alignItems: window.innerWidth < 640 ? 'flex-start' : 'center', padding: '12px 0', borderBottom: '1px solid #f1f5f9', gap: window.innerWidth < 640 ? 8 : 0 }}>
                         <div>
-                          <p style={{ fontWeight: 'bold', margin: 0 }}>
-                            {order.status === 'paid' ? getOrderProductNames(order) : (order.order_number || `ORD-${order.id}`)}
+                          <p style={{ fontWeight: 'bold', margin: 0, fontSize: window.innerWidth < 640 ? 13 : 14 }}>
+                            {order.status === 'paid' || order.status === 'shipped' || order.status === 'delivered' ? getOrderProductNames(order) : (order.order_number || `ORD-${order.id}`)}
                           </p>
-                          <p style={{ fontSize: 12, color: '#64748b', margin: '4px 0 0' }}>
+                          <p style={{ fontSize: 11, color: '#64748b', margin: '4px 0 0' }}>
                             <i className="fas fa-calendar-alt"></i> {order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}
                           </p>
                         </div>
-                        <div>
-                          <span style={{ background: getStatusColor(order.status), color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                          <span style={{ background: getStatusColor(order.status), color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 11 }}>
                             {order.status || 'pending'}
                           </span>
-                          <p style={{ margin: '4px 0 0', fontSize: 14, fontWeight: 'bold', textAlign: 'right' }}>${order.total_amount || 0}</p>
+                          <p style={{ margin: 0, fontSize: 14, fontWeight: 'bold' }}>${order.total_amount || 0}</p>
                         </div>
                       </div>
                     ))}
@@ -546,29 +611,29 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 </div>
               )}
 
-              {/* Users */}
+              {/* Users Table - Responsive */}
               {activeTab === 'users' && (
-                <div style={{ background: 'white', borderRadius: 12, overflow: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div style={{ background: 'white', borderRadius: 12, overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
                     <thead style={{ background: '#f8fafc' }}>
                       <tr>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-hashtag"></i> ID</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-user"></i> Name</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-envelope"></i> Email</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-shield-alt"></i> Role</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-hashtag"></i> ID</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-user"></i> Name</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-envelope"></i> Email</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-shield-alt"></i> Role</th>
                       </tr>
                     </thead>
                     <tbody>
                       {users.map(u => (
                         <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: 16 }}>{u.id}</td>
-                          <td style={{ padding: 16 }}><strong>{u.full_name}</strong></td>
-                          <td style={{ padding: 16 }}>{u.email}</td>
-                          <td style={{ padding: 16 }}>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>{u.id}</td>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}><strong>{u.full_name}</strong></td>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>{u.email}</td>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
                             {u.role === 'admin' ? (
-                              <span style={{ background: '#3b82f6', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12 }}>Admin</span>
+                              <span style={{ background: '#3b82f6', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 11 }}>Admin</span>
                             ) : (
-                              <span style={{ background: '#10b981', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 12 }}>User</span>
+                              <span style={{ background: '#10b981', color: 'white', padding: '4px 12px', borderRadius: 20, fontSize: 11 }}>User</span>
                             )}
                           </td>
                         </tr>
@@ -578,23 +643,23 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 </div>
               )}
 
-              {/* Products */}
+              {/* Products Table - Responsive */}
               {activeTab === 'products' && (
                 <div>
                   <div style={{ marginBottom: 20, textAlign: 'right' }}>
-                    <button onClick={() => { resetForm(); setShowProductModal(true); }} style={{ background: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => { resetForm(); setShowProductModal(true); }} style={{ background: '#3b82f6', color: 'white', padding: '10px 20px', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: window.innerWidth < 640 ? 13 : 14 }}>
                       <i className="fas fa-plus"></i> Create Product
                     </button>
                   </div>
-                  <div style={{ background: 'white', borderRadius: 12, overflow: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div style={{ background: 'white', borderRadius: 12, overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
                       <thead style={{ background: '#f8fafc' }}>
                         <tr>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-image"></i> Image</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-tag"></i> Title</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-dollar-sign"></i> Price</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-boxes"></i> Stock</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-cog"></i> Actions</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-image"></i> Image</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-tag"></i> Title</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-dollar-sign"></i> Price</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-boxes"></i> Stock</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-cog"></i> Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -602,115 +667,99 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                           <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                             <td style={{ padding: 12 }}>
                               {p.main_image ? (
-                                <img src={`${BASE_URL}${p.main_image}`} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 8 }} alt={p.title} />
+                                <img src={`${BASE_URL}${p.main_image}`} style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} alt={p.title} />
                               ) : (
-                                <div style={{ width: 50, height: 50, background: '#f1f5f9', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: 40, height: 40, background: '#f1f5f9', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   <i className="fas fa-image" style={{ color: '#94a3b8' }}></i>
                                 </div>
                               )}
                             </td>
-                            <td style={{ padding: 16 }}><strong>{p.title}</strong></td>
-                            <td style={{ padding: 16 }}>${p.original_price}</td>
-                            <td style={{ padding: 16 }}>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}><strong style={{ fontSize: window.innerWidth < 640 ? 12 : 14 }}>{p.title}</strong></td>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>${p.original_price}</td>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
                               {p.size_stock ? (
-                                <div style={{ fontSize: 12 }}>
-                                  {Object.entries(JSON.parse(p.size_stock)).map(([size, qty]) => (
-                                    <span key={size} style={{ display: 'inline-block', background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, margin: '2px' }}>
+                                <div style={{ fontSize: 10 }}>
+                                  {Object.entries(JSON.parse(p.size_stock)).slice(0, 2).map(([size, qty]) => (
+                                    <span key={size} style={{ display: 'inline-block', background: '#f1f5f9', padding: '2px 4px', borderRadius: 4, margin: '1px' }}>
                                       {size}: {qty}
                                     </span>
                                   ))}
+                                  {Object.keys(JSON.parse(p.size_stock)).length > 2 && <span>...</span>}
                                 </div>
                               ) : '-'}
                             </td>
-                            <td style={{ padding: 16 }}>
-                              <button onClick={() => handleEditProduct(p)} style={{ background: '#3b82f6', color: 'white', padding: '6px 12px', border: 'none', borderRadius: 6, cursor: 'pointer', marginRight: 8 }}>
-                                <i className="fas fa-edit"></i> Edit
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
+                              <button onClick={() => handleEditProduct(p)} style={{ background: '#3b82f6', color: 'white', padding: '4px 8px', border: 'none', borderRadius: 4, cursor: 'pointer', marginRight: 4, fontSize: 12 }}>
+                                <i className="fas fa-edit"></i>
                               </button>
-                              <button onClick={() => handleDeleteProduct(p.id)} style={{ background: '#ef4444', color: 'white', padding: '6px 12px', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
-                                <i className="fas fa-trash"></i> Delete
+                              <button onClick={() => handleDeleteProduct(p.id)} style={{ background: '#ef4444', color: 'white', padding: '4px 8px', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>
+                                <i className="fas fa-trash"></i>
                               </button>
                             </td>
                           </tr>
                         ))}
-                        {products.length === 0 && (
-                          <tr>
-                            <td colSpan="5" style={{ textAlign: 'center', padding: 40 }}>
-                              <i className="fas fa-box-open" style={{ fontSize: 48, color: '#94a3b8' }}></i>
-                              <p>No products yet</p>
-                            </td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
                 </div>
               )}
 
-              {/* Categories */}
+              {/* Categories Table - Responsive */}
               {activeTab === 'categories' && (
                 <div>
                   <div style={{ marginBottom: 20, textAlign: 'right' }}>
-                    <button onClick={() => setShowCategoryModal(true)} style={{ background: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => setShowCategoryModal(true)} style={{ background: '#3b82f6', color: 'white', padding: '10px 20px', border: 'none', borderRadius: 8, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                       <i className="fas fa-plus"></i> Create Category
                     </button>
                   </div>
-                  <div style={{ background: 'white', borderRadius: 12, overflow: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <div style={{ background: 'white', borderRadius: 12, overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 400 }}>
                       <thead style={{ background: '#f8fafc' }}>
                         <tr>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-hashtag"></i> ID</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-tag"></i> Name</th>
-                          <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-cog"></i> Actions</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-hashtag"></i> ID</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-tag"></i> Name</th>
+                          <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-cog"></i> Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {categories.map(c => (
                           <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: 16 }}>{c.id}</td>
-                            <td style={{ padding: 16 }}><strong>{c.name}</strong></td>
-                            <td style={{ padding: 16 }}>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>{c.id}</td>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}><strong>{c.name}</strong></td>
+                            <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
                               <button onClick={() => handleDeleteCategory(c.id)} style={{ background: '#ef4444', color: 'white', padding: '6px 12px', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
                                 <i className="fas fa-trash"></i> Delete
                               </button>
                             </td>
                           </tr>
                         ))}
-                        {categories.length === 0 && (
-                          <tr>
-                            <td colSpan="3" style={{ textAlign: 'center', padding: 40 }}>
-                              <i className="fas fa-folder-open" style={{ fontSize: 48, color: '#94a3b8' }}></i>
-                              <p>No categories yet</p>
-                            </td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
                 </div>
               )}
 
-              {/* Orders - FIXED: Shows product names after payment */}
+              {/* Orders Table - Responsive */}
               {activeTab === 'orders' && (
-                <div style={{ background: 'white', borderRadius: 12, overflow: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div style={{ background: 'white', borderRadius: 12, overflowX: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
                     <thead style={{ background: '#f8fafc' }}>
                       <tr>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-receipt"></i> Order / Product</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-dollar-sign"></i> Amount</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-chart-line"></i> Status</th>
-                        <th style={{ padding: 16, textAlign: 'left' }}><i className="fas fa-calendar"></i> Date</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-receipt"></i> Order / Product</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-dollar-sign"></i> Amount</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-chart-line"></i> Status</th>
+                        <th style={{ padding: window.innerWidth < 640 ? 12 : 16, textAlign: 'left' }}><i className="fas fa-calendar"></i> Date</th>
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map(o => (
                         <tr key={o.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: 16 }}>
-                            <strong>
-                              {/* Show product names if status is 'paid' or higher, otherwise show order number */}
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
+                            <strong style={{ fontSize: window.innerWidth < 640 ? 12 : 14 }}>
                               {(o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered') ? (
                                 <>
                                   <i className="fas fa-box" style={{ color: '#10b981', marginRight: 8 }}></i>
-                                  {getOrderProductNames(o)}
+                                  {getOrderProductNames(o).substring(0, 30)}{getOrderProductNames(o).length > 30 ? '...' : ''}
                                 </>
                               ) : (
                                 <>
@@ -719,33 +768,20 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                                 </>
                               )}
                             </strong>
-                            {o.items && o.items.length > 0 && (o.status === 'paid' || o.status === 'shipped' || o.status === 'delivered') && (
-                              <p style={{ fontSize: 11, color: '#64748b', margin: '4px 0 0' }}>
-                                <i className="fas fa-info-circle"></i> Order #{o.order_number || o.id}
-                              </p>
-                            )}
-                           </td>
-                          <td style={{ padding: 16 }}>${o.total_amount || 0}</td>
-                          <td style={{ padding: 16 }}>
-                            <span style={{ background: getStatusColor(o.status), color: 'white', padding: '6px 14px', borderRadius: 20, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                              <i className={`fas ${o.status === 'paid' ? 'fa-check-circle' : o.status === 'delivered' ? 'fa-truck' : 'fa-clock'}`}></i>
+                          </td>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>${o.total_amount || 0}</td>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
+                            <span style={{ background: getStatusColor(o.status), color: 'white', padding: '4px 10px', borderRadius: 20, fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              <i className={`fas ${o.status === 'paid' ? 'fa-check-circle' : o.status === 'delivered' ? 'fa-truck' : 'fa-clock'}`} style={{ fontSize: 10 }}></i>
                               {o.status || 'pending'}
                             </span>
                           </td>
-                          <td style={{ padding: 16 }}>
-                            <i className="fas fa-calendar-alt" style={{ marginRight: 6, color: '#94a3b8' }}></i>
+                          <td style={{ padding: window.innerWidth < 640 ? 12 : 16 }}>
+                            <i className="fas fa-calendar-alt" style={{ marginRight: 4, color: '#94a3b8' }}></i>
                             {o.created_at ? new Date(o.created_at).toLocaleDateString() : '-'}
                           </td>
                         </tr>
                       ))}
-                      {orders.length === 0 && (
-                        <tr>
-                          <td colSpan="4" style={{ textAlign: 'center', padding: 40 }}>
-                            <i className="fas fa-shopping-cart" style={{ fontSize: 48, color: '#94a3b8' }}></i>
-                            <p>No orders yet</p>
-                          </td>
-                        </tr>
-                      )}
                     </tbody>
                   </table>
                 </div>
@@ -755,11 +791,11 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
         </div>
       </div>
 
-      {/* Product Modal */}
+      {/* Product Modal - Responsive */}
       {showProductModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: 32, borderRadius: 12, width: 650, maxHeight: '90vh', overflow: 'auto' }}>
-            <h2 style={{ margin: '0 0 20px 0' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1002, padding: '16px' }}>
+          <div style={{ background: 'white', padding: window.innerWidth < 640 ? 20 : 32, borderRadius: 12, width: '90%', maxWidth: 650, maxHeight: '90vh', overflow: 'auto' }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: window.innerWidth < 640 ? 20 : 24 }}>
               <i className={`fas ${editingProduct ? 'fa-edit' : 'fa-plus-circle'}`} style={{ marginRight: 10, color: '#3b82f6' }}></i>
               {editingProduct ? 'Edit Product' : 'Create Product'}
             </h2>
@@ -769,7 +805,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 <input type="text" placeholder="Product title" value={productForm.title} onChange={(e) => setProductForm({...productForm, title: e.target.value})} style={{ width: '100%', padding: 10, border: '1px solid #e2e8f0', borderRadius: 8 }} required />
               </div>
               
-              <div style={{ display: 'flex', gap: 15, marginBottom: 15 }}>
+              <div style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', gap: 15, marginBottom: 15 }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}><i className="fas fa-dollar-sign"></i> Price</label>
                   <input type="number" placeholder="Price" value={productForm.original_price} onChange={(e) => setProductForm({...productForm, original_price: e.target.value})} style={{ width: '100%', padding: 10, border: '1px solid #e2e8f0', borderRadius: 8 }} required />
@@ -797,7 +833,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
               <div style={{ marginBottom: 15 }}>
                 <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}><i className="fas fa-ruler-combined"></i> Sizes with Stock</label>
                 
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <div style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', gap: 8, marginBottom: 10 }}>
                   <input 
                     type="text" 
                     value={newSize} 
@@ -815,7 +851,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 </div>
                 
                 {sizeStockList.length > 0 && (
-                  <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
+                  <div style={{ border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead style={{ background: '#f8fafc' }}>
                         <tr>
@@ -857,14 +893,14 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
               {/* Colors */}
               <div style={{ marginBottom: 15 }}>
                 <label style={{ display: 'block', marginBottom: 5, fontWeight: 'bold' }}><i className="fas fa-palette"></i> Colors</label>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                <div style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', gap: 8, marginBottom: 10 }}>
                   <input type="text" value={newColor} onChange={(e) => setNewColor(e.target.value)} placeholder="Add color (Red, Blue, Black)" style={{ flex: 1, padding: 10, border: '1px solid #e2e8f0', borderRadius: 8 }} />
                   <button type="button" onClick={addColor} style={{ padding: '10px 20px', background: '#10b981', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                     <i className="fas fa-plus"></i> Add
                   </button>
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {productForm.colors && productForm.colors.split(',').map(c => (
+                  {productForm.colors && productForm.colors.split(',').map(c => c.trim()).filter(c => c).map(c => (
                     <span key={c} style={{ background: '#f1f5f9', padding: '6px 12px', borderRadius: 20, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ display: 'inline-block', width: 12, height: 12, background: c.toLowerCase(), borderRadius: '50%' }}></span>
                       {c} 
@@ -909,7 +945,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 </div>
               </div>
               
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', gap: 12 }}>
                 <button type="submit" style={{ flex: 1, padding: 12, background: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }}>
                   {loading ? <i className="fas fa-spinner fa-spin"></i> : (editingProduct ? <><i className="fas fa-save"></i> Update</> : <><i className="fas fa-plus"></i> Create</>)}
                 </button>
@@ -922,11 +958,11 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
         </div>
       )}
 
-      {/* Category Modal */}
+      {/* Category Modal - Responsive */}
       {showCategoryModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: 32, borderRadius: 12, width: 450 }}>
-            <h2 style={{ margin: '0 0 20px 0' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1002, padding: '16px' }}>
+          <div style={{ background: 'white', padding: window.innerWidth < 640 ? 20 : 32, borderRadius: 12, width: '90%', maxWidth: 450 }}>
+            <h2 style={{ margin: '0 0 20px 0', fontSize: window.innerWidth < 640 ? 20 : 24 }}>
               <i className="fas fa-folder-plus" style={{ marginRight: 10, color: '#3b82f6' }}></i>
               Create Category
             </h2>
@@ -935,7 +971,7 @@ const API = 'https://backend-ecommerce-6hef.onrender.com/api';
                 <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}><i className="fas fa-tag"></i> Category Name</label>
                 <input type="text" placeholder="Enter category name" value={categoryForm.name} onChange={(e) => setCategoryForm({name: e.target.value})} style={{ width: '100%', padding: 12, border: '1px solid #e2e8f0', borderRadius: 8 }} required />
               </div>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: window.innerWidth < 640 ? 'column' : 'row', gap: 12 }}>
                 <button type="submit" style={{ flex: 1, padding: 12, background: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                   <i className="fas fa-check"></i> Create
                 </button>
